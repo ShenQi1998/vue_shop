@@ -10,15 +10,15 @@
     <el-container>
       <el-aside width="200px">
         <el-menu background-color="#333744" text-color="#fff" active-text-color="#ffd04b">
-        <el-submenu index="1">
+        <el-submenu :index="item.id + ''" v-for="item in menulist" :key="item.id">
           <template slot="title">
             <i class="el-icon-location"></i>
-            <span>导航一</span>
+            <span>{{item.authName}}</span>
           </template>
-          <el-menu-item index="1-4-1">
+          <el-menu-item :index="subItem.id + ''" v-for="subItem in item.children" :key="subItem.children">
             <template slot="title">
               <i class="el-icon-location"></i>
-            <span>导航一</span>
+            <span>{{subItem.authName}}</span>
           </template>
           </el-menu-item>
         </el-submenu>
@@ -31,12 +31,27 @@
 
 <script>
 export default {
+  data () {
+    return {
+      menulist: []
+    }
+  },
+  created () {
+    this.getMenuList()
+  },
   methods: {
     logout () {
       window.sessionStorage.clear()
       this.$router.push('/login')
+    },
+    async getMenuList () {
+      const { data: res } = await this.$http.get('menus')
+      if (res.meta.status !== 200) return this.$message.error(res.meta.msg)
+      this.menulist = res.data
+      console.log(res)
     }
   }
+
 }
 </script>
 
