@@ -9,15 +9,15 @@
     </el-header>
     <el-container>
       <el-aside width="200px">
-        <el-menu background-color="#333744" text-color="#fff" active-text-color="#ffd04b">
+        <el-menu background-color="#333744" text-color="#fff" active-text-color="#409EFF" :unique-opened="true">
         <el-submenu :index="item.id + ''" v-for="item in menulist" :key="item.id">
           <template slot="title">
-            <i class="el-icon-location"></i>
+            <i :class="iconsObj[item.id]"></i>
             <span>{{item.authName}}</span>
           </template>
           <el-menu-item :index="subItem.id + ''" v-for="subItem in item.children" :key="subItem.children">
             <template slot="title">
-              <i class="el-icon-location"></i>
+              <i class="el-icon-menu"></i>
             <span>{{subItem.authName}}</span>
           </template>
           </el-menu-item>
@@ -33,7 +33,14 @@
 export default {
   data () {
     return {
-      menulist: []
+      menulist: [],
+      iconsObj: {
+        125: 'iconfont iocn-users',
+        103: 'iconfont icon-tijikongjian',
+        101: 'iconfont icon-shangpin',
+        102: 'iconfont icon-danju',
+        145: 'iconfont icon-baobiao'
+      }
     }
   },
   created () {
@@ -80,9 +87,17 @@ export default {
 
 .el-aside {
   background-color: #333744;
+  .el-menu {
+    border-right: none;
+  }
 }
 
 .el-main {
   background-color: #eaedf1;
 }
+
+.iconfont {
+  margin-right: 10px;
+}
+
 </style>
