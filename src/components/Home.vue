@@ -10,7 +10,7 @@
     <el-container>
       <el-aside :width="isCollapse ? '64px' : '200px'">
         <div class="toggle-button" @click="togglecollpse">|||</div>
-        <el-menu background-color="#333744" text-color="#fff" active-text-color="#409EFF" :unique-opened="true" :collapse=isCollapse :collapse-transition="false" :router="true" :default-active="'/' + activePath">
+        <el-menu background-color="#333744" text-color="#fff" active-text-color="#409EFF" :unique-opened="true" :collapse=isCollapse :collapse-transition="false" :router="true" :default-active= "'/' + activePath">
         <el-submenu :index="item.id + ''" v-for="item in menulist" :key="item.id">
           <template slot="title">
             <i :class="iconsObj[item.id]"></i>
