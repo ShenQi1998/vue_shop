@@ -9,8 +9,8 @@
         <el-card>
             <el-row :gutter="20">
                 <el-col :span="8">
-                    <el-input placeholder="请输入内容">
-                        <el-button slot="append" icon="el-icon-search"></el-button>
+                    <el-input placeholder="请输入内容" v-model="queryInfo.query" :clearable="true" @clear="getUserList">
+                        <el-button slot="append" icon="el-icon-search" @click="getUserList"  ></el-button>
                     </el-input>
                 </el-col>
                 <el-col :span="4">
@@ -73,10 +73,10 @@ export default {
     }
   },
   created () {
-    this.getUserLsit()
+    this.getUserList()
   },
   methods: {
-    async getUserLsit () {
+    async getUserList () {
       const { data: res } = await this.$http.get('users', { params: this.queryInfo })
       if (res.meta.status !== 200) {
         return this.$message.error('获取用户列表失败')
@@ -88,12 +88,12 @@ export default {
     handleSizeChange (newSize) {
       console.log(newSize)
       this.queryInfo.pagesize = newSize
-      this.getUserLsit()
+      this.getUserList()
     },
     handleCurrentChange (newPage) {
       console.log(newPage)
       this.queryInfo.pagenum = newPage
-      this.getUserLsit()
+      this.getUserList()
     },
     async userStateChanged (userinfo) {
       console.log(userinfo)
