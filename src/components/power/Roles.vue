@@ -21,7 +21,7 @@
         <el-table-column label="操作" prop="roleDesc">
           <template slot-scope="scope">
             <el-button size="mini" type="primary" icon="el-icon-edit"  @click="editRoleDesc(scope.row.id)" >编辑</el-button>
-            <el-button size="mini" type="danger" icon="el-icon-delete" @click="removeRoleDesc(scope.row.id)" >删除</el-button>
+            <el-button size="mini" type="danger" icon="el-icon-delete" @click="removeRoleById(scope.row.id)" >删除</el-button>
             <el-button size="mini" type="warning" icon="el-icon-search">分配权限</el-button>
           </template>
         </el-table-column>
@@ -43,23 +43,20 @@
       </span>
     </el-dialog>
 
-    <!-- <el-dialog title="修改角色" :visible.sync="editRoleVisible" width="50%" @close= "editRoleClosed">
-      <el-form :model="editForm" :rules="editFormRules" ref="editFormRef" label-width="70px">
-        <el-form-item label="用户名" >
-          <el-input v-model="editForm.username" :disabled="true"></el-input>
+    <el-dialog title="修改用户" :visible.sync="editRoleVisible" width="50%" @close= "editRoleClosed">
+      <el-form :model="editForm" :rules="editFormRules" ref="editFormRef" label-width="100px">
+        <el-form-item label="角色名称" prop="roleName">
+          <el-input v-model="editForm.roleName"></el-input>
         </el-form-item>
-        <el-form-item label="邮箱" prop = "email">
-          <el-input v-model="editForm.email"></el-input>
-        </el-form-item>
-        <el-form-item label="手机" prop = "mobile">
-          <el-input v-model="editForm.mobile"></el-input>
+        <el-form-item label="角色描述" prop="roleDesc">
+          <el-input v-model="editForm.roleDesc"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="editDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="editUserInfo">确 定</el-button>
+        <el-button @click="editRoleVisible = false">取 消</el-button>
+        <el-button type="primary" @click="editRoleInfo">确 定</el-button>
       </span>
-    </el-dialog> -->
+    </el-dialog>
 
   </div>
 </template>
@@ -70,8 +67,14 @@ export default {
     return {
       rolelist: [],
       addForm: { roleName: '', roleDesc: '' },
+      editForm: {},
       addRoleVisible: false,
+      editRoleVisible: false,
       addFormRules: {
+        roleName: [{ required: true, message: '请输角色名', trigger: 'blur' }],
+        roleDesc: [{ required: false, message: '请输角色描述', trigger: 'blur' }]
+      },
+      editFormRules: {
         roleName: [{ required: true, message: '请输角色名', trigger: 'blur' }],
         roleDesc: [{ required: false, message: '请输角色描述', trigger: 'blur' }]
       }
@@ -81,9 +84,9 @@ export default {
     this.getRolesList()
   },
   methods: {
+
     async getRolesList () {
       const { data: res } = await this.$http.get('roles')
-
       if (res.meta.status !== 200) {
         return this.$message.error('获取请求失败')
       }
@@ -96,9 +99,13 @@ export default {
       this.$refs.addFormRef.resetFields()
     },
 
-    // 点击确定，与校验
+    editRoleClosed () {
+    // 清空表单
+      this.$refs.editFormRef.resetFields()
+    },
+
+    // 添加
     addRole () {
-      console.log('11111')
       this.$refs.addFormRef.validate(async valid => {
         console.log(valid)
         if (!valid) return
@@ -112,6 +119,54 @@ export default {
         // 重新获取用户数据
         this.getRolesList()
       })
+    },
+
+    // 修改
+    editRoleInfo () {
+      this.$refs.editFormRef.validate(async valid => {
+        console.log(valid)
+        if (!valid) return
+        const { data: res } = await this.$http.put('roles/' + this.editForm.roleId, { roleName: this.editForm.roleName, roleDesc: this.editForm.roleDesc })
+
+        if (res.meta.status !== 201) {
+          this.$message.success('修改用户信息失败')
+        }
+        this.$message.success('修改用户信息成功')
+        // 隐藏添加用户的对话框
+        this.editDialogVisible = false
+        // 重新获取用户数据
+        this.getRolesList()
+      })
+    },
+
+    // 单笔查询
+    async editRoleDesc (id) {
+      const { data: res } = await this.$http.get('roles/' + id)
+      if (res.meta.status !== 200) {
+        return this.$message.error('查询用户信息失败！')
+      }
+      this.editForm = res.data
+      this.editRoleVisible = true
+    },
+
+    async removeRoleById (id) {
+    // 弹框
+      const confirmResult = await this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).catch(err => {
+        return err
+      })
+      if (confirmResult !== 'confirm') {
+        return this.$message.info('已取消删除')
+      }
+      const { data: res } = await this.$http.delete('roles/' + id)
+      if (res.meta.status !== 200) {
+        return this.$message.error('删除用户失败')
+      }
+      this.$message.success('删除用户成功')
+      this.getRolesList()
     }
   }
 }
