@@ -79,10 +79,10 @@
     </el-dialog>
 
     <el-dialog title="分配权限" :visible.sync="setRightDialogVisible" width="50%">
-      <el-tree :data="rightslist" :props="treeProps" show-checkbox node-key="id" :default-expand-all="true" :default-checked-keys="defkeys"></el-tree>
+      <el-tree :data="rightslist" :props="treeProps" show-checkbox node-key="id" :default-expand-all="true" :default-checked-keys="defkeys" ref = "treeRef"></el-tree>
       <span slot="footer" class="dialog-footer">
         <el-button @click="setRightDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="setRightDialogVisible = false">确 定</el-button>
+        <el-button type="primary" @click = "allotRights()">确 定</el-button>
       </span>
     </el-dialog>
 
@@ -112,7 +112,8 @@ export default {
       editFormRules: {
         roleName: [{ required: true, message: '请输角色名', trigger: 'blur' }],
         roleDesc: [{ required: false, message: '请输角色描述', trigger: 'blur' }]
-      }
+      },
+      roleId: ''
     }
   },
   created () {
@@ -221,6 +222,7 @@ export default {
     },
 
     async showSetRightDialog (role) {
+      this.roleId = role.id
       const { data: res } = await this.$http.get('rights/tree')
       if (res.meta.status !== 200) {
         return this.$message.error('获取权限失败')
@@ -238,6 +240,22 @@ export default {
       }
 
       node.children.forEach(item => this.getLeafKeys(item, array))
+    },
+
+    async allotRights (role) {
+      const keys = [...this.$refs.treeRef.getCheckedKeys(), ...this.$refs.treeRef.getHalfCheckedKeys()]
+      console.log(keys)
+
+      const idStr = keys.join(',')
+      const { data: res } = await this.$http.post(`roles/${this.roleId}/rights`, { rids: idStr })
+
+      if (res.meta.status !== 200) {
+        return this.$message.error('分配权限失败')
+      }
+
+      this.$message.success('分配权限成功')
+      this.getRolesList()
+      this.setRightDialogVisible = false
     }
   }
 }
